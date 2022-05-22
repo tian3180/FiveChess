@@ -34,7 +34,7 @@ public class GraphicalInterface extends JFrame implements MouseListener {
         setResizable(false);  //设置窗体不可改变大小   为了避免窗体大小出现显示错误
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  //设置窗体关闭时的操作
         //默认关闭后程序结束
-        setVisible(true);  //设置窗体可见
+        setVisible(true);  //设置窗体可见  测试
     }
 
 
