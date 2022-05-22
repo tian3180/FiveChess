@@ -18,6 +18,7 @@ import java.io.FileInputStream;
  */
 public class GraphicalInterface extends JFrame implements MouseListener {
     //定义基本属性  创建需要的基本组件
+    JPanel jPanel = new JPanel();
     int width = Toolkit.getDefaultToolkit().getScreenSize().width; //获取屏幕的宽度
     int height = Toolkit.getDefaultToolkit().getScreenSize().height; //获取屏幕的高度
     //利用获取到的屏幕的高度和宽度来使窗体居中
@@ -54,6 +55,12 @@ public class GraphicalInterface extends JFrame implements MouseListener {
         setResizable(false);  //设置窗体不可改变大小   为了避免窗体大小出现显示错误
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  //设置窗体关闭时的操作
         //默认关闭后程序结束
+
+        //获取容器 并设置布局方式
+        Container container = getContentPane();
+        container.setLayout(new BorderLayout());
+
+
 
 
 
