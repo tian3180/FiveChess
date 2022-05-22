@@ -53,6 +53,9 @@ public class GraphicalInterface extends JFrame implements MouseListener {
     //悔棋
     Button back = new Button("悔棋");
 
+    //设置提示信息
+    String message="黑方先行";
+
     //构造函数  设置窗体基本信息
     //建造图形界面
     public GraphicalInterface() {
@@ -147,6 +150,10 @@ public class GraphicalInterface extends JFrame implements MouseListener {
         g.drawString("黑方时间：无限制", 190, 45);
         g.drawString("白方时间：无限制", 380, 45);
 
+        //提示该谁下棋
+        g.setFont(new Font("宋体", Font.BOLD, 20));
+        g.drawString(message, 200, 75);
+
         //绘制旗子
         for (int i = 0; i < 15; i++) {
             for (int j = 0; j < 15; j++) {
@@ -192,10 +199,16 @@ public class GraphicalInterface extends JFrame implements MouseListener {
                 return;
             }
             //记录目标棋盘位置 并且给予赋值
-            if (cnt % 2 == 0)
+            if (cnt % 2 == 0){
                 chess[row][col] = 1; //黑棋
-            else
+                message="轮到白方";
+            }
+
+            else{
                 chess[row][col] = 2; //白棋
+                message="轮到黑方";
+            }
+
             cnt++;
             this.repaint();
             //判断游戏是否结束
