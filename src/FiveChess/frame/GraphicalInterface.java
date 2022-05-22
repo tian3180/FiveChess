@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,7 +14,7 @@ import java.io.FileInputStream;
  * @author jobszhu
  * @date 2022/5/22 10:02
  * @project FiveChess
- * @Description  窗体基本结构UI
+ * @Description 窗体基本结构UI
  */
 public class GraphicalInterface extends JFrame implements MouseListener {
     //定义基本属性  创建需要的基本组件
@@ -32,8 +33,16 @@ public class GraphicalInterface extends JFrame implements MouseListener {
     int row = 0; //棋盘行数
     int col = 0; //棋盘列数
 
+    int cnt = 0; //记录棋子个数   也用来记录轮到白方还是黑方下了
+
     //保存之前下过所有的棋子的坐标
     int[][] chess = new int[15][15];  //0：代表这个点没有落子   1：代表下的黑子  2：代表下的白子
+
+    //selectTarget保存选中的目标点  true代表鼠标正在这个位置 false代表鼠标没有在这个位置
+    boolean[][] selectTarget = new boolean[15][15];
+
+    //标识当前游戏是否可以继续
+    boolean isGameOver = false;
 
     //构造函数  设置窗体基本信息
     //建造图形界面
@@ -46,6 +55,8 @@ public class GraphicalInterface extends JFrame implements MouseListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);  //设置窗体关闭时的操作
         //默认关闭后程序结束
 
+
+
         try {
             //读取背景图片
             backgroundImage = ImageIO.read(new FileInputStream("src/images/table545.png"));
@@ -55,12 +66,46 @@ public class GraphicalInterface extends JFrame implements MouseListener {
             white = ImageIO.read(new FileInputStream("src/images/white-32.png"));
             //读取选中棋点图片
             select = ImageIO.read(new FileInputStream("src/images/select-32.png"));
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         //添加鼠标监听
         addMouseListener(this);
+        //添加鼠标移动监听
+        addMouseMotionListener(new MouseMotionListener() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+
+            }
+
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                x = e.getX();
+                y = e.getY();
+                //判断点击范围是否在棋盘上
+                if (x >= 34 && x <= 510 && y >= 116 && y <= 590) {
+                    //把其他位置都设置为false
+                    for (int i = 0; i < 15; i++) {
+                        for (int j = 0; j < 15; j++) {
+                            selectTarget[i][j] = false;
+                        }
+                    }
+                    //点击棋盘上的棋子
+                    col = (y - 115) / 32;  //每个棋点的间隙是34  所以除以34得到列数
+                    row = (x - 33) / 32;  //每个棋点的间隙是34  所以除以34得到行数
+                    //绘制鼠标选定点
+                    selectTarget[row][col] = true;
+                    //为避免绘图过于频繁卡顿，休息100毫秒
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    repaint();
+                }
+            }
+        });
 
         setVisible(true);  //设置窗体可见
     }
@@ -71,25 +116,32 @@ public class GraphicalInterface extends JFrame implements MouseListener {
         g.drawImage(backgroundImage, 0, 80, this);
         //绘制游戏信息板块  输出标题信息
         g.setFont(new Font("宋体", Font.BOLD, 40));
-        g.drawString("游戏信息：",10,65);
+        g.drawString("游戏信息：", 10, 65);
         g.setFont(new Font("宋体", Font.ITALIC, 20));
         //输出时间信息
-        g.drawString("黑方时间：无限制",190,45);
-        g.drawString("白方时间：无限制",380,45);
+        g.drawString("黑方时间：无限制", 190, 45);
+        g.drawString("白方时间：无限制", 380, 45);
 
         //绘制旗子
-//        g.drawImage(black,row*34,col*34,this);
         for (int i = 0; i < 15; i++) {
             for (int j = 0; j < 15; j++) {
                 if (chess[i][j] == 1) {
-                    g.drawImage(black, i * 34, j * 34, this);
+                    g.drawImage(black, i * 34 + 20, j * 34 + 100, this);
                 } else if (chess[i][j] == 2) {
-                    g.drawImage(white, i * 34, j * 34, this);
+                    g.drawImage(white, i * 34 + 20, j * 34 + 100, this);
+                }
+            }
+        }
+
+        //绘制选中棋点
+        for (int i = 0; i < 15; i++) {
+            for (int j = 0; j < 15; j++) {
+                if (selectTarget[i][j]) {
+                    g.drawImage(select, i * 34 + 20, j * 34 + 100, this);
                 }
             }
         }
     }
-
 
 
     @Override
@@ -99,15 +151,40 @@ public class GraphicalInterface extends JFrame implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        System.out.println("x:"+e.getX()+"y:"+e.getY());
+        if(isGameOver)  //如果游戏结束不在允许下棋
+            return;
+        System.out.println("x:" + e.getX() + "y:" + e.getY());
         x = e.getX();
         y = e.getY();
         //判断点击范围是否在棋盘上
-        if(x>=34 && x<=510 && y>=116 && y<=590){
+        if (x >= 34 && x <= 510 && y >= 116 && y <= 590) {
             //点击棋盘上的棋子
-            row = (y-116)/34;  //每个棋点的间隙是34  所以除以34得到行数
-            col = (x-34)/34;  //每个棋点的间隙是34  所以除以34得到列数
-            repaint();
+            col = (y - 115) / 32;  //每个棋点的间隙是34  所以除以34得到列数
+            row = (x - 33) / 32;  //每个棋点的间隙是34  所以除以34得到行数
+            //判断位置是否以及有棋子  如果有棋子则不能下
+            if (chess[row][col] != 0) {
+                JOptionPane.showMessageDialog(this, "当前位置已经有棋了，请重新落棋");
+                return;
+            }
+            //记录目标棋盘位置 并且给予赋值
+            if (cnt % 2 == 0)
+                chess[row][col] = 1; //黑棋
+            else
+                chess[row][col] = 2; //白棋
+            cnt++;
+            this.repaint();
+            //判断游戏是否结束
+            if (checkWin(row, col)) {
+                if(chess[row][col] == 1){
+                    JOptionPane.showMessageDialog(this, "黑棋胜利");
+                    isGameOver=true;
+                }
+                else if (chess[row][col] == 2){
+                    JOptionPane.showMessageDialog(this, "白棋胜利");
+                    isGameOver=true;
+                }
+
+            }
         }
     }
 
@@ -126,4 +203,87 @@ public class GraphicalInterface extends JFrame implements MouseListener {
 
     }
 
+    //判断赢棋的方法
+    private boolean checkWin(int row, int col) {
+        //判断横向  纵坐标相同 即y相同
+        int color = chess[row][col];
+        int count = 1;  //记录相同棋子的个数
+        int i = 1;
+        while (color == chess[row+i][col]) {
+            count++;
+            i++;
+            if(count==5) {
+                return true;
+            }
+        }
+        i = 1;
+        count=1;
+        while (color == chess[row-i][col]) {
+            count++;
+            i++;
+            if(count==5) {
+                return true;
+            }
+        }
+        //判断纵向  横坐标相同 即x相同
+        i=1;
+        count=1;
+        while (color == chess[row][col+i]) {
+            count++;
+            i++;
+            if(count==5) {
+                return true;
+            }
+        }
+        i=1;
+        count=1;
+        while (color == chess[row][col-i]) {
+            count++;
+            i++;
+            if(count==5) {
+                return true;
+            }
+        }
+        //斜的方向
+        i=1;
+        count=1;
+        while (color == chess[row+i][col+i]) {
+            count++;
+            i++;
+            if(count==5) {
+                return true;
+            }
+        }
+        i=1;
+        count=1;
+        while (color == chess[row-i][col-i]) {
+            count++;
+            i++;
+            if(count==5) {
+                return true;
+            }
+        }
+        i=1;
+        count=1;
+        while (color == chess[row-i][col+i]) {
+            count++;
+            i++;
+            if(count==5) {
+                return true;
+            }
+        }
+        i=1;
+        count=1;
+        while (color == chess[row+i][col-i]) {
+            count++;
+            i++;
+            if(count==5) {
+                return true;
+            }
+        }
+
+
+        //找不到五子连珠
+        return false;
+    }
 }
