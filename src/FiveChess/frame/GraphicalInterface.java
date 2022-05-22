@@ -45,6 +45,14 @@ public class GraphicalInterface extends JFrame implements MouseListener {
     //标识当前游戏是否可以继续
     boolean isGameOver = false;
 
+    //按键
+    Button blackBtn = new Button("黑棋"); //声明底部组件
+    Button whiteBtn = new Button("白棋");
+
+    Button startAllOverAgain = new Button("重新开始");
+    //悔棋
+    Button back = new Button("悔棋");
+
     //构造函数  设置窗体基本信息
     //建造图形界面
     public GraphicalInterface() {
@@ -60,8 +68,18 @@ public class GraphicalInterface extends JFrame implements MouseListener {
         Container container = getContentPane();
         container.setLayout(new BorderLayout());
 
+        jPanel.add(whiteBtn);
+        jPanel.add(blackBtn);
+        jPanel.add(startAllOverAgain);
+        jPanel.add(back);
+        //设置初始按钮背景颜色
+        whiteBtn.setBackground(Color.white);
+        blackBtn.setBackground(Color.black);
+        startAllOverAgain.setBackground(Color.red);
+        back.setBackground(Color.blue);
 
-
+        //假如按键模块
+        container.add(jPanel, BorderLayout.SOUTH);
 
 
         try {
@@ -160,7 +178,7 @@ public class GraphicalInterface extends JFrame implements MouseListener {
     public void mousePressed(MouseEvent e) {
         if(isGameOver)  //如果游戏结束不在允许下棋
             return;
-        System.out.println("x:" + e.getX() + "y:" + e.getY());
+//        System.out.println("x:" + e.getX() + "y:" + e.getY());
         x = e.getX();
         y = e.getY();
         //判断点击范围是否在棋盘上
