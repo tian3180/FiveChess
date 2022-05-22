@@ -156,7 +156,7 @@ public class GraphicalInterface extends JFrame implements MouseListener {
 
         //绘制旗子
         for (int i = 0; i < 15; i++) {
-            for (int j = 0; j < 15; j++) {
+            for (int j = 0; j < 15; j++) {//dwa
                 if (chess[i][j] == 1) {
                     g.drawImage(black, i * 34 + 20, j * 34 + 100, this);
                 } else if (chess[i][j] == 2) {
