@@ -7,6 +7,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.sql.Time;
 
 /**
  * @author jobszhu
@@ -14,7 +15,7 @@ import java.io.FileInputStream;
  * @project FiveChess
  * @Description 窗体基本结构UI
  */
-public class GraphicalInterface extends JFrame implements MouseListener {
+public class GraphicalInterface extends JFrame implements MouseListener ,Runnable {
 
     //定义基本属性  创建需要的基本组件
     JPanel jPanel = new JPanel();
@@ -34,6 +35,16 @@ public class GraphicalInterface extends JFrame implements MouseListener {
     int col = 0; //棋盘列数
 
     int cnt = 0; //记录棋子个数   也用来记录轮到白方还是黑方下了
+
+
+    //设置倒计时的最大值
+    int maxTime = 0;
+
+    //倒计时的线程
+    Thread thread = new Thread(this);
+
+
+    int backRow, backCol; //记录棋子的位置
 
     //保存之前下过所有的棋子的坐标
     int[][] chess = new int[15][15];  //0：代表这个点没有落子   1：代表下的黑子  2：代表下的白子
@@ -55,7 +66,8 @@ public class GraphicalInterface extends JFrame implements MouseListener {
     Button admitDefeat = new Button("认输");
     //游戏设置按钮  用来设置步时
     Button gameSetting = new Button("设置");
-
+    //游戏说明按键
+    Button gameInstruction = new Button("说明");
     //设置提示信息
     String message="黑方先行";
 
@@ -63,7 +75,7 @@ public class GraphicalInterface extends JFrame implements MouseListener {
     //建造图形界面
     public GraphicalInterface() {
         setTitle("五子棋");  //设置窗体标题
-        setSize(545, 625);  //窗体大小应该和棋盘照片的大小一致  多设置的高用于填充游戏信息板块
+        setSize(545, 700);  //窗体大小应该和棋盘照片的大小一致  多设置的高用于填充游戏信息板块
         setLocation(width / 2 - getWidth() / 2, height / 2 - getHeight() / 2); //设置窗体居中
         //getWidth()、getHeight()获取窗体的宽度和高度
         setResizable(false);  //设置窗体不可改变大小   为了避免窗体大小出现显示错误
@@ -80,6 +92,8 @@ public class GraphicalInterface extends JFrame implements MouseListener {
         jPanel.add(back);
         jPanel.add(admitDefeat);
         jPanel.add(gameSetting);
+        jPanel.add(gameInstruction);
+
         //设置初始按钮背景颜色
         whiteBtn.setBackground(Color.ORANGE);
 //        blackBtn.setBackground(Color.black);
@@ -164,6 +178,63 @@ public class GraphicalInterface extends JFrame implements MouseListener {
             }
         });
 
+        //游戏说明按键点击事件
+        gameInstruction.addActionListener(new ActionListener() {
+                                              @Override
+                                              public void actionPerformed(ActionEvent e) {
+                                                  JOptionPane.showMessageDialog(null, "游戏说明：\n" +
+                                                          "1.点击棋盘上的棋子即可下棋，每次下棋后，系统会自动判断是否有五子连珠，如果有，则游戏结束，并显示输赢信息。\n" +
+                                                          "2.点击游戏设置按钮可以设置游戏的模式，模式包括：人人对战、人机对战、人人认输、人机认输。\n" +
+                                                          "3.点击游戏设置按钮可以设置游戏的模式，模式包括：人人对战、人机对战、人人认输、人机认输。\n" +
+                                                          "4.点击游戏设置按钮可以设置游戏的模式，模式包括：人人对战、人机对战、人人认输、人机认输。\n" +
+                                                          "5.点击);");
+                                              }
+                                          });
+
+        //悔棋按键点击事件
+        back.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //判断是否有棋子可悔棋
+                if (cnt!=0) {
+                    //悔棋
+                    if (cnt%2!=0) {
+                        //黑棋悔棋
+                        chess[backRow][backCol] = 0;
+                        //提示语
+                        JOptionPane.showMessageDialog(null, "黑方悔棋成功");
+                        message = "请黑方落子";
+                    } else if (cnt%2==0) {
+                        //白棋悔棋
+                        chess[backRow][backCol] = 0;
+                        //提示语
+                        JOptionPane.showMessageDialog(null, "白方悔棋成功");
+                        message = "请白方落子";
+                    }
+
+                    //悔棋后提示语
+                    repaint();
+                    cnt--;
+                }
+            }});
+
+        //启动线程
+//        thread.start();
+        //挂起线程
+
+        //游戏设置按钮点击事件
+        gameSetting.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String input = JOptionPane.showInputDialog("请输入游戏的最大时间（分钟）：");
+                try {
+                    maxTime = Integer.parseInt(input) * 60;  //转化为秒
+                }catch (Exception e1) {
+                    JOptionPane.showMessageDialog(null, "请输入正确的数字");
+                }
+
+            }
+        });
         setVisible(true);  //设置窗体可见
     }
 
@@ -227,6 +298,8 @@ public class GraphicalInterface extends JFrame implements MouseListener {
             //点击棋盘上的棋子
             col = (y - 115) / 32;  //每个棋点的间隙是34  所以除以34得到列数
             row = (x - 33) / 32;  //每个棋点的间隙是34  所以除以34得到行数
+            backRow= row;
+            backCol= col;
             //判断位置是否以及有棋子  如果有棋子则不能下
             if (chess[row][col] != 0) {
                 JOptionPane.showMessageDialog(this, "当前位置已经有棋了，请重新落棋");
@@ -357,5 +430,10 @@ public class GraphicalInterface extends JFrame implements MouseListener {
 
         //找不到五子连珠
         return false;
+    }
+
+    @Override
+    public void run() {
+
     }
 }
