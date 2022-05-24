@@ -3,9 +3,7 @@ package FiveChess.frame;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.awt.event.MouseMotionListener;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,6 +15,7 @@ import java.io.FileInputStream;
  * @Description 窗体基本结构UI
  */
 public class GraphicalInterface extends JFrame implements MouseListener {
+
     //定义基本属性  创建需要的基本组件
     JPanel jPanel = new JPanel();
     int width = Toolkit.getDefaultToolkit().getScreenSize().width; //获取屏幕的宽度
@@ -52,6 +51,10 @@ public class GraphicalInterface extends JFrame implements MouseListener {
     Button startAllOverAgain = new Button("重新开始");
     //悔棋
     Button back = new Button("悔棋");
+    //认输按钮
+    Button admitDefeat = new Button("认输");
+    //游戏设置按钮  用来设置步时
+    Button gameSetting = new Button("设置");
 
     //设置提示信息
     String message="黑方先行";
@@ -70,16 +73,18 @@ public class GraphicalInterface extends JFrame implements MouseListener {
         //获取容器 并设置布局方式
         Container container = getContentPane();
         container.setLayout(new BorderLayout());
-
+        //加入按钮
         jPanel.add(whiteBtn);
         jPanel.add(blackBtn);
         jPanel.add(startAllOverAgain);
         jPanel.add(back);
+        jPanel.add(admitDefeat);
+        jPanel.add(gameSetting);
         //设置初始按钮背景颜色
-        whiteBtn.setBackground(Color.white);
-        blackBtn.setBackground(Color.black);
-        startAllOverAgain.setBackground(Color.red);
-        back.setBackground(Color.blue);
+        whiteBtn.setBackground(Color.ORANGE);
+//        blackBtn.setBackground(Color.black);
+//        startAllOverAgain.setBackground(Color.red);
+//        back.setBackground(Color.blue);
 
         //假如按键模块
         container.add(jPanel, BorderLayout.SOUTH);
@@ -124,9 +129,9 @@ public class GraphicalInterface extends JFrame implements MouseListener {
                     row = (x - 33) / 32;  //每个棋点的间隙是34  所以除以34得到行数
                     //绘制鼠标选定点
                     selectTarget[row][col] = true;
-                    //为避免绘图过于频繁卡顿，休息100毫秒
+                    //为避免绘图过于频繁卡顿，休息10毫秒
                     try {
-                        Thread.sleep(100);
+                        Thread.sleep(10);
                     } catch (InterruptedException e1) {
                         e1.printStackTrace();
                     }
@@ -135,32 +140,60 @@ public class GraphicalInterface extends JFrame implements MouseListener {
             }
         });
 
+        //点击重新开始游戏按键 重新开始游戏
+        startAllOverAgain.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //重新开始游戏
+                startAllOverAgain();
+                JOptionPane.showMessageDialog(null, "游戏已重新开始");
+            }
+
+            private void startAllOverAgain() {
+                //将chess数组中的所有元素设置为0
+                for (int i = 0; i < 15; i++) {
+                    for (int j = 0; j < 15; j++) {
+                        chess[i][j] = 0;
+                    }
+                }
+                repaint();
+                //取消游戏结束的状态
+                isGameOver= false;
+                //设置初始化的提示语
+                message = "黑方先行";
+            }
+        });
+
         setVisible(true);  //设置窗体可见
     }
 
 
     public void paint(Graphics g) {
+        //双缓冲技术 减少绘图过程中的卡顿
+        BufferedImage bufferedImage1 = new BufferedImage(545, 625, BufferedImage.TYPE_INT_RGB);
+        Graphics g2 = bufferedImage1.createGraphics();  //将所有东西以照片的方式写入内存
+
         //绘制背景图片
-        g.drawImage(backgroundImage, 0, 80, this);
+        g2.drawImage(backgroundImage, 0, 80, this);
         //绘制游戏信息板块  输出标题信息
-        g.setFont(new Font("宋体", Font.BOLD, 40));
-        g.drawString("游戏信息：", 10, 65);
-        g.setFont(new Font("宋体", Font.ITALIC, 20));
+        g2.setFont(new Font("宋体", Font.BOLD, 40));
+        g2.drawString("游戏信息：", 10, 65);
+        g2.setFont(new Font("宋体", Font.ITALIC, 20));
         //输出时间信息
-        g.drawString("黑方时间：无限制", 190, 45);
-        g.drawString("白方时间：无限制", 380, 45);
+        g2.drawString("黑方时间：无限制", 190, 45);
+        g2.drawString("白方时间：无限制", 380, 45);
 
         //提示该谁下棋
-        g.setFont(new Font("宋体", Font.BOLD, 20));
-        g.drawString(message, 200, 75);
+        g2.setFont(new Font("宋体", Font.BOLD, 20));
+        g2.drawString("目前轮到："+message, 200, 75);
 
         //绘制旗子
         for (int i = 0; i < 15; i++) {
             for (int j = 0; j < 15; j++) {
                 if (chess[i][j] == 1) {
-                    g.drawImage(black, i * 34 + 20, j * 34 + 100, this);
+                    g2.drawImage(black, i * 34 + 20, j * 34 + 100, this);
                 } else if (chess[i][j] == 2) {
-                    g.drawImage(white, i * 34 + 20, j * 34 + 100, this);
+                    g2.drawImage(white, i * 34 + 20, j * 34 + 100, this);
                 }
             }
         }
@@ -169,10 +202,11 @@ public class GraphicalInterface extends JFrame implements MouseListener {
         for (int i = 0; i < 15; i++) {
             for (int j = 0; j < 15; j++) {
                 if (selectTarget[i][j]) {
-                    g.drawImage(select, i * 34 + 20, j * 34 + 100, this);
+                    g2.drawImage(select, i * 34 + 20, j * 34 + 100, this);
                 }
             }
         }
+        g.drawImage(bufferedImage1,0,0,this);
     }
 
 
@@ -201,12 +235,12 @@ public class GraphicalInterface extends JFrame implements MouseListener {
             //记录目标棋盘位置 并且给予赋值
             if (cnt % 2 == 0){
                 chess[row][col] = 1; //黑棋
-                message="轮到白方";
+                message="请白方落子";
             }
 
             else{
                 chess[row][col] = 2; //白棋
-                message="轮到黑方";
+                message="请黑方落子";
             }
 
             cnt++;
