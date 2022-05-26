@@ -534,7 +534,8 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
                         break;
                     }
                 }
-                System.out.println("黑棋剩余时间："+blackTime+"白棋剩余时间："+whiteTime);
+                //test
+//                System.out.println("黑棋剩余时间："+blackTime+"白棋剩余时间："+whiteTime);
             }
 //        }
 
