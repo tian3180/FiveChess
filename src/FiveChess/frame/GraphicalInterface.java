@@ -5,9 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.FileInputStream;
-import java.sql.Time;
 
 /**
  * @author jobszhu
@@ -44,6 +42,16 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
     Thread thread = new Thread(this);
 
 
+
+    //保存黑方与白方的剩余倒计时时间
+    int blackTime = 0;
+    int whiteTime = 0;
+
+    String whiteMessage = "无限制";
+    String blackMessage = "无限制";
+
+
+
     int backRow, backCol; //记录棋子的位置
 
     //保存之前下过所有的棋子的坐标
@@ -70,6 +78,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
     Button gameInstruction = new Button("说明");
     //设置提示信息
     String message="黑方先行";
+
 
     //构造函数  设置窗体基本信息
     //建造图形界面
@@ -175,6 +184,11 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
                 isGameOver= false;
                 //设置初始化的提示语
                 message = "黑方先行";
+                //设置黑方先行
+                cnt = 0;
+                //初始化剩余时间
+                blackTime = maxTime;
+                whiteTime = maxTime;
             }
         });
 
@@ -219,16 +233,74 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
             }});
 
         //启动线程
-//        thread.start();
+        thread.start();
+
         //挂起线程
 
         //游戏设置按钮点击事件
         gameSetting.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String input = JOptionPane.showInputDialog("请输入游戏的最大时间（分钟）：");
+                String input = JOptionPane.showInputDialog("请输入游戏的最大时间（分钟）输入0表示没有时间限制：");
                 try {
                     maxTime = Integer.parseInt(input) * 60;  //转化为秒
+                    if(maxTime<0)
+                        JOptionPane.showMessageDialog(null, "输入的时间不能小于0");
+                    if(maxTime == 0){
+                        JOptionPane.showMessageDialog(null, "游戏时间限制已经取消");
+                        //重新开始游戏
+
+                        //将chess数组中的所有元素设置为0
+                        for (int i = 0; i < 15; i++) {
+                            for (int j = 0; j < 15; j++) {
+                                chess[i][j] = 0;
+                            }
+                        }
+
+                        //取消游戏结束的状态
+                        isGameOver= false;
+                        //设置初始化的提示语
+                        message = "黑方先行";
+                        //设置黑方先行
+                        cnt = 0;
+                        //初始化剩余时间
+                        blackTime = maxTime;
+                        whiteTime = maxTime;
+
+                        blackMessage = "无限制";
+                        whiteMessage = "无限制";
+
+                        repaint();
+
+
+                    }
+
+                    if(maxTime>0){
+                        JOptionPane.showMessageDialog(null, "设置完成");
+                        //重新开始游戏
+
+                        //将chess数组中的所有元素设置为0
+                        for (int i = 0; i < 15; i++) {
+                            for (int j = 0; j < 15; j++) {
+                                chess[i][j] = 0;
+                            }
+                        }
+
+                        //取消游戏结束的状态
+                        isGameOver= false;
+                        //设置初始化的提示语
+                        message = "黑方先行";
+                        //设置黑方先行
+                        cnt = 0;
+                        //初始化剩余时间
+                        blackTime = maxTime;
+                        whiteTime = maxTime;
+                        blackMessage = maxTime/3600+":"+(maxTime - maxTime/3600)/60+":"+(maxTime-maxTime/60*60);  //格式化输出时间
+                        whiteMessage = maxTime/3600+":"+(maxTime - maxTime/3600)/60+":"+(maxTime-maxTime/60*60);
+
+                        repaint();
+                    }
+
                 }catch (Exception e1) {
                     JOptionPane.showMessageDialog(null, "请输入正确的数字");
                 }
@@ -251,8 +323,8 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
         g2.drawString("游戏信息：", 10, 65);
         g2.setFont(new Font("宋体", Font.ITALIC, 20));
         //输出时间信息
-        g2.drawString("黑方时间：无限制", 190, 45);
-        g2.drawString("白方时间：无限制", 380, 45);
+        g2.drawString("黑方时间："+blackMessage, 190, 45);
+        g2.drawString("白方时间："+ whiteMessage, 380, 45);
 
         //提示该谁下棋
         g2.setFont(new Font("宋体", Font.BOLD, 20));
@@ -434,6 +506,37 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
 
     @Override
     public void run() {
+        //判断是否有时间的限制
+//        int maxTime=10;
+//        if(maxTime>0){
+            while(true){
+                if(cnt% 2 ==0)
+                    blackTime--;
+                else
+                    whiteTime--;
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                if(maxTime>0){
+                    blackMessage = blackTime/3600+":"+(blackTime - blackTime/3600)/60+":"+(blackTime-blackTime/60*60);
+                    whiteMessage = whiteTime/3600+":"+(whiteTime - whiteTime/3600)/60+":"+(whiteTime-whiteTime/60*60);
+                    repaint();
+                    if(blackTime ==0){
+                        JOptionPane.showMessageDialog(this, "黑棋时间到，白棋胜利");
+                        isGameOver=true;
+                        break;
+                    }
+                    if(whiteTime ==0){
+                        JOptionPane.showMessageDialog(this, "白棋时间到，黑棋胜利");
+                        isGameOver=true;
+                        break;
+                    }
+                }
+                System.out.println("黑棋剩余时间："+blackTime+"白棋剩余时间："+whiteTime);
+            }
+//        }
 
     }
 }
