@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
+import java.util.jar.JarEntry;
 
 /**
  * @author jobszhu
@@ -94,6 +95,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
         //获取容器 并设置布局方式
         Container container = getContentPane();
         container.setLayout(new BorderLayout());
+        jPanel.setLayout(new GridLayout(2,5));
         //加入按钮
         jPanel.add(whiteBtn);
         jPanel.add(blackBtn);
@@ -198,10 +200,10 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
                                               public void actionPerformed(ActionEvent e) {
                                                   JOptionPane.showMessageDialog(null, "游戏说明：\n" +
                                                           "1.点击棋盘上的棋子即可下棋，每次下棋后，系统会自动判断是否有五子连珠，如果有，则游戏结束，并显示输赢信息。\n" +
-                                                          "2.点击游戏设置按钮可以设置游戏的模式，模式包括：人人对战、人机对战、人人认输、人机认输。\n" +
-                                                          "3.点击游戏设置按钮可以设置游戏的模式，模式包括：人人对战、人机对战、人人认输、人机认输。\n" +
-                                                          "4.点击游戏设置按钮可以设置游戏的模式，模式包括：人人对战、人机对战、人人认输、人机认输。\n" +
-                                                          "5.点击);");
+                                                          "2.默认设置为不限步时，黑方先手，自动切换黑白子下棋。\n" +
+                                                          "3.点击游戏设置可以设置步时，游戏中某方步时耗尽则输掉比赛。\n" +
+                                                          "4.更多游戏介绍和设置请打开工程文件代码目录里的Readme.md 或 Readme.pdf。\n"
+                                                          );
                                               }
                                           });
 
