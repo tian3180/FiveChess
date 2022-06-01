@@ -18,6 +18,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
 
     //定义基本属性  创建需要的基本组件
     JPanel jPanel = new JPanel();
+    Container container = getContentPane();
     int width = Toolkit.getDefaultToolkit().getScreenSize().width; //获取屏幕的宽度
     int height = Toolkit.getDefaultToolkit().getScreenSize().height; //获取屏幕的高度
     //利用获取到的屏幕的高度和宽度来使窗体居中
@@ -65,18 +66,18 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
     boolean isGameOver = false;
 
     //按键
-    Button blackBtn = new Button("黑棋"); //声明底部组件
-    Button whiteBtn = new Button("白棋");
+    JButton blackBtn = new JButton("黑棋"); //声明底部组件
+    JButton whiteBtn = new JButton("白棋");
 
-    Button startAllOverAgain = new Button("重新开始");
+    JButton startAllOverAgain = new JButton("重新开始");
     //悔棋
-    Button back = new Button("悔棋");
+    JButton back = new JButton("悔棋");
     //认输按钮
-    Button admitDefeat = new Button("认输");
+    JButton admitDefeat = new JButton("认输");
     //游戏设置按钮  用来设置步时
-    Button gameSetting = new Button("设置");
+    JButton gameSetting = new JButton("设置");
     //游戏说明按键
-    Button gameInstruction = new Button("说明");
+    JButton gameInstruction = new JButton("说明");
     //设置提示信息
     String message="黑方先行";
 
@@ -84,6 +85,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
     //构造函数  设置窗体基本信息
     //建造图形界面
     public GraphicalInterface() {
+        //设置窗体基本信息
         setTitle("五子棋");  //设置窗体标题
         setSize(545, 700);  //窗体大小应该和棋盘照片的大小一致  多设置的高用于填充游戏信息板块
         setLocation(width / 2 - getWidth() / 2, height / 2 - getHeight() / 2); //设置窗体居中
@@ -93,7 +95,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
         //默认关闭后程序结束
 
         //获取容器 并设置布局方式
-        Container container = getContentPane();
+
         container.setLayout(new BorderLayout());
         jPanel.setLayout(new GridLayout(2,5));
         //加入按钮
@@ -105,14 +107,18 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
         jPanel.add(gameSetting);
         jPanel.add(gameInstruction);
 
+
         //设置初始按钮背景颜色
-        whiteBtn.setBackground(Color.ORANGE);
+//        whiteBtn.setBackground(Color.red);
+//        whiteBtn.setBackground(Color.ORANGE);
 //        blackBtn.setBackground(Color.black);
 //        startAllOverAgain.setBackground(Color.red);
 //        back.setBackground(Color.blue);
 
         //假如按键模块
         container.add(jPanel, BorderLayout.SOUTH);
+
+        JOptionPane.showMessageDialog(null,"祝你游戏愉快");
 
 
         try {
