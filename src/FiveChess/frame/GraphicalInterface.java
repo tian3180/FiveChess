@@ -240,6 +240,29 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
                 }
             }});
 
+        //认输按键
+        admitDefeat.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //判断是否有棋子可悔棋
+                if (cnt!=0) {
+                    if (cnt%2==0) {
+                        //黑棋认输
+                        JOptionPane.showMessageDialog(null, "黑方认输，白方获胜");
+//                        message = "黑方认输，白方获胜";
+                    } else if (cnt%2!=0) {
+                        //白棋认输
+                        JOptionPane.showMessageDialog(null, "白方认输，黑方获胜");
+//                        message = "白方认输，黑方获胜";
+                    }
+
+                    //悔棋后提示语
+                    isGameOver= true;
+//                    repaint();
+//                    cnt--;
+                }
+            }});
+
         //启动线程
         thread.start();
 
