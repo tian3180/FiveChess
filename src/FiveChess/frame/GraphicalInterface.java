@@ -49,8 +49,8 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
     int blackTime = 0;
     int whiteTime = 0;
 
-    String whiteMessage = "无限制";
-    String blackMessage = "无限制";
+    String whiteMessage = "无限制";   //白方剩余时间
+    String blackMessage = "无限制";    //黑方剩余时间
 
 
 
@@ -81,6 +81,11 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
     //设置提示信息
     String message="黑方先行";
 
+    //0为自动模式 1为手动模式
+    int mode =0;
+
+    int mode_play=0;  //用于保存该谁下棋  0 黑  1 白
+
 
     //构造函数  设置窗体基本信息
     //建造图形界面
@@ -108,17 +113,31 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
         jPanel.add(gameInstruction);
 
 
-        //设置初始按钮背景颜色
-//        whiteBtn.setBackground(Color.red);
-//        whiteBtn.setBackground(Color.ORANGE);
-//        blackBtn.setBackground(Color.black);
-//        startAllOverAgain.setBackground(Color.red);
-//        back.setBackground(Color.blue);
 
         //假如按键模块
         container.add(jPanel, BorderLayout.SOUTH);
 
-        JOptionPane.showMessageDialog(null,"祝你游戏愉快");
+        //游戏开始提示语
+        JOptionPane.showMessageDialog(null,"祝你游戏愉快\n"+"游戏说明：\n" +
+                "模式选择：自动模式：自动切换白黑方下棋｜｜ 手动模式：手动选择白黑方下棋（手动模式下不能设置步时）\n"+
+                "1.点击棋盘上的棋子即可下棋，每次下棋后，系统会自动判断是否有五子连珠，如果有，则游戏结束，并显示输赢信息。\n" +
+                "2.默认设置为不限步时，黑方先手，自动切换黑白子下棋。\n" +
+                "3.点击游戏设置可以设置步时，游戏中某方步时耗尽则输掉比赛。\n" +
+                "4.更多游戏介绍和设置请打开工程文件代码目录里的Readme.md 或 Readme.pdf。\n");
+
+        //确认对话框
+        mode = JOptionPane.showOptionDialog(null, "请选择游戏模式", "游戏模式选择", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,null, new String[]{"自动模式","手动模式"}, "自动模式");
+
+        //如果选择的是手动模式
+        if(mode ==1){
+            mode_play= 0;  //设置为黑先手
+            message= "请黑方落子";  //设置标语信息
+            repaint();
+        }
+
+
+
+
 
 
         try {
@@ -176,8 +195,16 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
             @Override
             public void actionPerformed(ActionEvent e) {
                 //重新开始游戏
+
+                mode = JOptionPane.showOptionDialog(null, "请选择游戏模式", "游戏模式选择", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE,null, new String[]{"自动模式","手动模式"}, "自动模式");
                 startAllOverAgain();
                 JOptionPane.showMessageDialog(null, "游戏已重新开始");
+                if(mode ==1){
+                    mode_play= 0;  //设置为黑先手
+                    message= "请黑方落子";
+                    repaint();
+                }
+
             }
 
             private void startAllOverAgain() {
@@ -240,6 +267,25 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
                 }
             }});
 
+        //白棋按键点击事件
+        whiteBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //判断是否有棋子可悔棋
+                mode_play=1;
+                message= "请白方落子";
+                repaint();
+            }});
+
+        //黑棋按键点击事件
+        blackBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                //判断是否有棋子可悔棋
+                mode_play=0;
+                message= "请黑方落子";
+                repaint();
+            }});
         //认输按键
         admitDefeat.addActionListener(new ActionListener() {
             @Override
@@ -272,6 +318,11 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
         gameSetting.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if(mode ==1){
+                    JOptionPane.showMessageDialog(null,"手动模式无法设置时间");
+                    return;
+                }
+
                 String input = JOptionPane.showInputDialog("请输入游戏的最大时间（分钟）输入0表示没有时间限制：");
                 try {
                     maxTime = Integer.parseInt(input) * 60;  //转化为秒
@@ -391,49 +442,96 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if(isGameOver)  //如果游戏结束不在允许下棋
-            return;
-//        System.out.println("x:" + e.getX() + "y:" + e.getY());
-        x = e.getX();
-        y = e.getY();
-        //判断点击范围是否在棋盘上
-        if (x >= 34 && x <= 510 && y >= 116 && y <= 590) {
-            //点击棋盘上的棋子
-            col = (y - 115) / 32;  //每个棋点的间隙是34  所以除以34得到列数
-            row = (x - 33) / 32;  //每个棋点的间隙是34  所以除以34得到行数
-            backRow= row;
-            backCol= col;
-            //判断位置是否以及有棋子  如果有棋子则不能下
-            if (chess[row][col] != 0) {
-                JOptionPane.showMessageDialog(this, "当前位置已经有棋了，请重新落棋");
+        if(mode==0){
+            if(isGameOver)  //如果游戏结束不在允许下棋
                 return;
-            }
-            //记录目标棋盘位置 并且给予赋值
-            if (cnt % 2 == 0){
-                chess[row][col] = 1; //黑棋
-                message="请白方落子";
-            }
-
-            else{
-                chess[row][col] = 2; //白棋
-                message="请黑方落子";
-            }
-
-            cnt++;
-            this.repaint();
-            //判断游戏是否结束
-            if (checkWin(row, col)) {
-                if(chess[row][col] == 1){
-                    JOptionPane.showMessageDialog(this, "黑棋胜利");
-                    isGameOver=true;
+//        System.out.println("x:" + e.getX() + "y:" + e.getY());
+            x = e.getX();
+            y = e.getY();
+            //判断点击范围是否在棋盘上
+            if (x >= 34 && x <= 510 && y >= 116 && y <= 590) {
+                //点击棋盘上的棋子
+                col = (y - 115) / 32;  //每个棋点的间隙是34  所以除以34得到列数
+                row = (x - 33) / 32;  //每个棋点的间隙是34  所以除以34得到行数
+                backRow= row;
+                backCol= col;
+                //判断位置是否以及有棋子  如果有棋子则不能下
+                if (chess[row][col] != 0) {
+                    JOptionPane.showMessageDialog(this, "当前位置已经有棋了，请重新落棋");
+                    return;
                 }
-                else if (chess[row][col] == 2){
-                    JOptionPane.showMessageDialog(this, "白棋胜利");
-                    isGameOver=true;
+                //记录目标棋盘位置 并且给予赋值
+                if (cnt % 2 == 0){
+                    chess[row][col] = 1; //黑棋
+                    message="请白方落子";
                 }
 
+                else{
+                    chess[row][col] = 2; //白棋
+                    message="请黑方落子";
+                }
+
+                cnt++;
+                this.repaint();
+                //判断游戏是否结束
+                if (checkWin(row, col)) {
+                    if(chess[row][col] == 1){
+                        JOptionPane.showMessageDialog(this, "黑棋胜利");
+                        isGameOver=true;
+                    }
+                    else if (chess[row][col] == 2){
+                        JOptionPane.showMessageDialog(this, "白棋胜利");
+                        isGameOver=true;
+                    }
+
+                }
             }
         }
+        //手动模式
+        else{
+            if(isGameOver)  //如果游戏结束不在允许下棋
+                return;
+//        System.out.println("x:" + e.getX() + "y:" + e.getY());
+            x = e.getX();
+            y = e.getY();
+            //判断点击范围是否在棋盘上
+            if (x >= 34 && x <= 510 && y >= 116 && y <= 590) {
+                //点击棋盘上的棋子
+                col = (y - 115) / 32;  //每个棋点的间隙是34  所以除以34得到列数
+                row = (x - 33) / 32;  //每个棋点的间隙是34  所以除以34得到行数
+                backRow= row;
+                backCol= col;
+                //判断位置是否以及有棋子  如果有棋子则不能下
+                if (chess[row][col] != 0) {
+                    JOptionPane.showMessageDialog(this, "当前位置已经有棋了，请重新落棋");
+                    return;
+                }
+                //记录目标棋盘位置 并且给予赋值
+                if(mode_play==0){
+                    chess[row][col] = 1; //黑棋
+                }
+
+                if(mode_play==1){
+                    chess[row][col] = 2; //白棋
+                }
+
+                cnt++;
+                this.repaint();
+                //判断游戏是否结束
+                if (checkWin(row, col)) {
+                    if(chess[row][col] == 1){
+                        JOptionPane.showMessageDialog(this, "黑棋胜利");
+                        isGameOver=true;
+                    }
+                    else if (chess[row][col] == 2){
+                        JOptionPane.showMessageDialog(this, "白棋胜利");
+                        isGameOver=true;
+                    }
+
+                }
+            }
+        }
+
     }
 
     @Override
@@ -465,7 +563,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
             }
         }
         i = 1;
-        count=1;
+//        count=1;
         while (color == chess[row-i][col]) {
             count++;
             i++;
@@ -484,7 +582,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
             }
         }
         i=1;
-        count=1;
+//        count=1;
         while (color == chess[row][col-i]) {
             count++;
             i++;
@@ -503,7 +601,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
             }
         }
         i=1;
-        count=1;
+//        count=1;
         while (color == chess[row-i][col-i]) {
             count++;
             i++;
@@ -521,7 +619,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
             }
         }
         i=1;
-        count=1;
+//        count=1;
         while (color == chess[row+i][col-i]) {
             count++;
             i++;
@@ -550,7 +648,7 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                if(maxTime>0){
+                if(maxTime>0 && mode==0){
                     blackMessage = blackTime/3600+":"+(blackTime - blackTime/3600)/60+":"+(blackTime-blackTime/60*60);
                     whiteMessage = whiteTime/3600+":"+(whiteTime - whiteTime/3600)/60+":"+(whiteTime-whiteTime/60*60);
                     repaint();
