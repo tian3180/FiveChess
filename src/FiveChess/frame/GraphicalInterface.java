@@ -9,7 +9,7 @@ import java.io.FileInputStream;
 import java.util.jar.JarEntry;
 
 /**
- * @author jobszhu
+ * @author 朱剑
  * @date 2022/5/22 10:02
  * @project FiveChess
  * @Description 窗体基本结构UI

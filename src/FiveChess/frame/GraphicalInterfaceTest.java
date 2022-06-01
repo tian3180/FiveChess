@@ -1,7 +1,7 @@
 package FiveChess.frame;
 
 /**
- * @author jobszhu
+ * @author 朱剑
  * @date 2022/5/22 10:14
  * @project FiveChess
  * @Description
