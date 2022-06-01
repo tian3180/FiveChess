@@ -202,6 +202,8 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
                 if(mode ==1){
                     mode_play= 0;  //设置为黑先手
                     message= "请黑方落子";
+                    blackMessage = "无限制";
+                    whiteMessage = "无限制";
                     repaint();
                 }
 
@@ -659,22 +661,24 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
-                if(maxTime>0 && mode==0){
-                    blackMessage = blackTime/3600+":"+(blackTime - blackTime/3600)/60+":"+(blackTime-blackTime/60*60);
-                    whiteMessage = whiteTime/3600+":"+(whiteTime - whiteTime/3600)/60+":"+(whiteTime-whiteTime/60*60);
-                    repaint();
-                    if(blackTime ==0){
-                        JOptionPane.showMessageDialog(this, "黑棋时间到，白棋胜利");
-                        isGameOver=true;
-                        break;
+                } finally {
+                    if(maxTime>0 && mode==0){
+                        blackMessage = blackTime/3600+":"+(blackTime - blackTime/3600)/60+":"+(blackTime-blackTime/60*60);
+                        whiteMessage = whiteTime/3600+":"+(whiteTime - whiteTime/3600)/60+":"+(whiteTime-whiteTime/60*60);
+                        repaint();
+                        if(blackTime ==0){
+                            JOptionPane.showMessageDialog(this, "黑棋时间到，白棋胜利");
+                            isGameOver=true;
+                            break;
+                        }
+                        if(whiteTime ==0){
+                            JOptionPane.showMessageDialog(this, "白棋时间到，黑棋胜利");
+                            isGameOver=true;
+                            break;
+                        }
                     }
-                    if(whiteTime ==0){
-                        JOptionPane.showMessageDialog(this, "白棋时间到，黑棋胜利");
-                        isGameOver=true;
-                        break;
-                    }
                 }
+
                 //test
 //                System.out.println("黑棋剩余时间："+blackTime+"白棋剩余时间："+whiteTime);
             }
