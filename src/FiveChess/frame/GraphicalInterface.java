@@ -533,11 +533,11 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
                 this.repaint();
                 //判断游戏是否结束
                 if (checkWin(row, col)) {
-                    if(chess[row][col] == 1){
+                    if(chess[row][col] == 1){  //黑棋胜利
                         JOptionPane.showMessageDialog(this, "黑棋胜利");
                         isGameOver=true;
                     }
-                    else if (chess[row][col] == 2){
+                    else if (chess[row][col] == 2){  //白棋胜利
                         JOptionPane.showMessageDialog(this, "白棋胜利");
                         isGameOver=true;
                     }
@@ -654,23 +654,26 @@ public class GraphicalInterface extends JFrame implements MouseListener ,Runnabl
 //        if(maxTime>0){
             while(true){
                 if(cnt% 2 ==0)
-                    blackTime--;
+                    blackTime--;   //黑棋时间减一
                 else
-                    whiteTime--;
+                    whiteTime--;  //白棋时间减一
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(1000);  //每秒减一
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 } finally {
                     if(maxTime>0 && mode==0){
-                        blackMessage = blackTime/3600+":"+(blackTime - blackTime/3600)/60+":"+(blackTime-blackTime/60*60);
-                        whiteMessage = whiteTime/3600+":"+(whiteTime - whiteTime/3600)/60+":"+(whiteTime-whiteTime/60*60);
-                        repaint();
+                        //如果模式为自动模式  并且有时间限制
+                        blackMessage = blackTime/3600+":"+(blackTime - blackTime/3600)/60+":"+(blackTime-blackTime/60*60);  //处理输出格式
+                        whiteMessage = whiteTime/3600+":"+(whiteTime - whiteTime/3600)/60+":"+(whiteTime-whiteTime/60*60);  //处理输出格式
+                        repaint();  //重绘
+                        //判断时间是否到了
                         if(blackTime ==0){
                             JOptionPane.showMessageDialog(this, "黑棋时间到，白棋胜利");
                             isGameOver=true;
                             break;
                         }
+                        //判断时间是否到了
                         if(whiteTime ==0){
                             JOptionPane.showMessageDialog(this, "白棋时间到，黑棋胜利");
                             isGameOver=true;
